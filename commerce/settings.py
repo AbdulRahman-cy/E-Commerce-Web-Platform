@@ -69,6 +69,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'commerce.wsgi.application'
+AUTH_USER_MODEL = "auctions.User"
+
+#added this so when @login_required redirects me to this route
+LOGIN_URL = "/login"
+
 
 
 
