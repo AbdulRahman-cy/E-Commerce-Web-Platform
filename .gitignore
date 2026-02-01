@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.env/
+.env.*
+
+# Django
+db.sqlite3
+media/
+
+# Static collected files (if you ever use collectstatic)
+staticfiles/
+
+# IDE / editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
