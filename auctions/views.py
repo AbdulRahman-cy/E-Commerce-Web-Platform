@@ -1,11 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import Listing
-from .models import User
+from .models import *
 
 
 def login_view(request):
@@ -56,14 +55,45 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
-    
-def index(request):
-    #fetch database listings
-    listings = Listing.objects.filter(is_active=True)
 
+@login_required
+def index(request):
+    
+    listings = Listing.objects.filter(is_active=True)
+    user = request.user
+    user_likes = user.likes.all()
+    liked_listings = Listing.objects.filter(likes__in=user_likes)
+    
     
     #return index.html
-    return render(request, "auctions/index.html",{
-                "listings": listings})
+    return render(request, "auctions/index.html", {
+                "listings": listings,
+                "liked_listings": liked_listings })
+
+@login_required
+def toggle_like(request, listing_id):
+
+    if request.method == "POST":
+        #I used .first() method to return single model instance
+        like = Like.objects.filter(listing_id=listing_id, user_id=request.user.id).first()
+        if like:
+            like.delete()
+
+            #This is a normal python variable
+            liked = False
+        else:
+            #I1-I need to imporve the code here using error message , Integrity error
+            Like.objects.create(user_id=request.user.id, listing_id=listing_id)
+            liked = True
+        
+        like_count = Like.objects.filter(listing_id=listing_id).count()
+
+        return JsonResponse({
+        'liked': liked,
+        'count': like_count
+    })
+        
+        
+
 
 

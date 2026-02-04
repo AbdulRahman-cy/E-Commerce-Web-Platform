@@ -32,6 +32,32 @@
     font-size: 0.9rem;
     color: #6b7280;
 }
+
+/* Like button styles */
+.like-btn {
+    outline: none;
+    background: none;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.like-btn:hover {
+    outline: none;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.like-btn.liked {
+    outline: none;
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
 </style>
 
 <h2 class="mb-4">Active listings</h2>
@@ -63,9 +89,17 @@
                     Listed by {{ listing.owner.username }}
                 </p>
 
-                <p class="meta mb-0">
+                <p class="meta mb-2">
                     {{ listing.created_at|date:"M d, Y" }}
                 </p>
+
+                {# Like button - check if current user has already liked this #}
+                <button class="like-btn {% if listing in liked_listings %}liked{% endif %}"
+                    data-listing-id="{{ listing.id }}">
+
+                    ❤️ <span class="like-count">{{ listing.likes.count }}</span> 
+                    <span class="like-text"> likes </span>
+                </button>
 
             </div>
 
@@ -77,5 +111,63 @@
     {% endfor %}
 
 </div>
+
+<script>
+
+    //Copied from django's docummentation
+    function getCookie(name){
+        let cookieValue = null;
+        if(document.cookie && document.cookie !== null){
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++){
+                const cookie = cookies[i].trim()
+                if(cookie.substring(0, name.length + 1) === (name + '=')){
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    return cookieValue;
+                    break;
+                }
+            }
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.like-btn').forEach(function(button) {
+            button.addEventListener('click', async function(event){
+                event.preventDefault();
+                const listingId = button.dataset.listingId;
+
+                const csrftoken = getCookie('csrftoken');
+
+                try {
+                    const response = await fetch(`/listing/${listingId}/like/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({})
+                    });
+                    
+                    const data = await response.json();
+
+                    const likeCount = button.querySelector('.like-count');
+                    likeCount.textContent = data.count;
+
+                    if (data.liked) {
+                        button.classList.add('liked');
+                    } else {
+                        button.classList.remove('liked');
+            }
+                }
+                catch(error) {
+                    console.error('Error:', error);
+                    alert('Failed to update like');
+                }
+                
+                
+            });
+        });
+    });
+</script>
 
 {% endblock %}
