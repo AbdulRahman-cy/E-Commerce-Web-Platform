@@ -67,7 +67,7 @@
     {% for listing in listings %}
         <div class="col-md-4">
 
-            <div class="listing-card">
+            <div class="listing-card" data-listing-id="{{listing.id}}">
 
                 {% if listing.image_url %}
                     <img src="{{ listing.image_url }}"
@@ -164,6 +164,17 @@
                 }
                 
                 
+            });
+        });
+        const cards = document.querySelectorAll('.listing-card')
+        cards.forEach(function(card) {
+            card.addEventListener('click', function(){
+                if(event.target.closest('.like-btn')){
+                return;
+                }
+
+                const listingId = card.dataset.listingId;
+                window.location.href = `/listing/${listingId}`;
             });
         });
     });
