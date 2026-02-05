@@ -103,11 +103,13 @@ def listing(request, listing_id):
     liked_listings = Listing.objects.filter(likes__in=user_likes)
 
     comments = Comment.objects.filter(listing_id = listing_id)
+    comments_count = comments.count()
 
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "liked_listings":liked_listings,
-        "comments": comments
+        "comments": comments,
+        "comments_count": comments_count
     })      
 
 @login_required
