@@ -90,7 +90,7 @@
 
       <h5 class="mb-3">Add a comment</h5>
 
-      <form>
+      <form action="{% url 'comment' listing.id %}" method="POST">
         {% csrf_token %}
 
         <div class="mb-3">
@@ -121,7 +121,7 @@
           <div class="card-body py-2">
             <strong>{{ comment.user.username }}</strong>
             <div class="text-muted small">
-              {{ comment.comment }}
+              {{ comment.content }}
             </div>
           </div>
         </div>

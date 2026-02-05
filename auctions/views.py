@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -102,10 +102,33 @@ def listing(request, listing_id):
     user_likes = user.likes.all()
     liked_listings = Listing.objects.filter(likes__in=user_likes)
 
+    comments = Comment.objects.filter(listing_id = listing_id)
+
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "liked_listings":liked_listings
-    })
+        "liked_listings":liked_listings,
+        "comments": comments
+    })      
+
+@login_required
+def comment(request, listing_id):
+    if request.method == "POST":
+        content = request.POST["comment"]
+        
+        listing = get_object_or_404(Listing, pk=listing_id)
+        
+        #Adding to db
+        try:
+            Comment.objects.create(user=request.user, listing=listing, content=content)
+        except IntegrityError:
+            #I2- I think i should change render to redirect with django error messages
+            return render(request, "listing.html", {
+                "message": "Error Cannot upload comments"
+            })
+        
+        return redirect("listing", listing_id=listing_id)
+        
+        
         
         
 
