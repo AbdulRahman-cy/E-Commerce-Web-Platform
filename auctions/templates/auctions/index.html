@@ -96,7 +96,6 @@
                 {# Like button - check if current user has already liked this #}
                 <button class="like-btn {% if listing in liked_listings %}liked{% endif %}"
                     data-listing-id="{{ listing.id }}">
-
                     ❤️ <span class="like-count">{{ listing.likes.count }}</span> 
                     <span class="like-text"> likes </span>
                 </button>

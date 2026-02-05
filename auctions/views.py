@@ -58,7 +58,7 @@ def register(request):
 
 @login_required
 def index(request):
-    
+
     listings = Listing.objects.filter(is_active=True)
     user = request.user
     user_likes = user.likes.all()
@@ -91,6 +91,20 @@ def toggle_like(request, listing_id):
         return JsonResponse({
         'liked': liked,
         'count': like_count
+    })
+
+@login_required
+def listing(request, listing_id):
+
+    listing = get_object_or_404(Listing, pk=listing_id)
+
+    user = request.user
+    user_likes = user.likes.all()
+    liked_listings = Listing.objects.filter(likes__in=user_likes)
+
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+        "liked_listings":liked_listings
     })
         
         
