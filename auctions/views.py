@@ -80,16 +80,15 @@ def index(request):
 def toggle_like(request, listing_id):
 
     if request.method == "POST":
-        #I used .first() method to return single model instance
-        like = Like.objects.filter(listing_id=listing_id, user_id=request.user.id).first()
-        if like:
-            like.delete()
 
-            #This is a normal python variable
+        listing = get_object_or_404(Listing, pk=listing_id)
+        like, created = Like.objects.get_or_create(listing=listing, user=request.user)
+
+        if not created:
+            like.delete()
+        
             liked = False
         else:
-            #I1-I need to imporve the code here using error message , Integrity error
-            Like.objects.create(user_id=request.user.id, listing_id=listing_id)
             liked = True
         
         like_count = Like.objects.filter(listing_id=listing_id).count()
@@ -125,22 +124,29 @@ def listing(request, listing_id):
 @login_required
 def comment(request, listing_id):
     if request.method == "POST":
-        content = request.POST["comment"]
+        #This means if no content return an empty string
+        content = request.POST.get("comment", "").strip()
+
+        if not content:
+            messages.error(request, "Comment cannot be empty")
+            return redirect("listing", listing_id=listing_id)
         
         listing = get_object_or_404(Listing, pk=listing_id)
         
-        #Adding to db
         try:
-            Comment.objects.create(user=request.user, listing=listing, content=content)
-        except IntegrityError:
-            #I2- I think i should change render to redirect with django error messages
-            return render(request, "listing.html", {
-                "message": "Error Cannot upload comments"
-            })
+            Comment.objects.create(
+                user=request.user, 
+                listing=listing, 
+                content=content
+            )
+            messages.success(request, "Comment added successfully")
+        except Exception as e:
+            messages.error(request, "Failed to add comment")
         
         return redirect("listing", listing_id=listing_id)
     
-#I4- watchlist function gets activated when triggered from several routes so should i include the "listing_id as a parameter"
+    return redirect("listing", listing_id=listing_id)
+    
 @login_required
 def watchlist(request):
     if request.method == "POST":
@@ -159,14 +165,3 @@ def watchlist(request):
                 messages.error(request, "Cannot add to watchlist")
             messages.success(request, "Added to watchlist")
         return redirect(request.META.get('HTTP_REFERER', 'index'))
-        
-       
-
-    
-        
-        
-        
-        
-
-
-
