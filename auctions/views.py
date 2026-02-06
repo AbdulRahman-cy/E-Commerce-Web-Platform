@@ -65,12 +65,16 @@ def index(request):
     user_likes = user.likes.all()
     #user_likes => querySet
     liked_listings = Listing.objects.filter(likes__in=user_likes)
+
+    watchlists = Watchlist.objects.all()
+    watchlist = Listing.objects.filter(watchlists__in=watchlists)
     
     
     #return index.html
     return render(request, "auctions/index.html", {
                 "listings": listings,
-                "liked_listings": liked_listings })
+                "liked_listings": liked_listings,
+                "watchlist": watchlist })
 
 @login_required
 def toggle_like(request, listing_id):
