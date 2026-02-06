@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.contrib import messages
+from django.views.decorators.cache import never_cache
 
 
 def login_view(request):
@@ -57,6 +58,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+@never_cache
 @login_required
 def index(request):
 
@@ -66,7 +68,7 @@ def index(request):
     #user_likes => querySet
     liked_listings = Listing.objects.filter(likes__in=user_likes)
 
-    watchlists = Watchlist.objects.all()
+    watchlists = Watchlist.objects.filter(user=user)
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
     
     
@@ -98,6 +100,7 @@ def toggle_like(request, listing_id):
         'count': like_count
     })
 
+@never_cache
 @login_required
 def listing(request, listing_id):
 
@@ -110,7 +113,7 @@ def listing(request, listing_id):
     comments = Comment.objects.filter(listing_id = listing_id)
     comments_count = comments.count()
 
-    watchlists = Watchlist.objects.all()
+    watchlists = Watchlist.objects.filter(user=user)
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
 
     return render(request, "auctions/listing.html", {
@@ -148,7 +151,7 @@ def comment(request, listing_id):
     return redirect("listing", listing_id=listing_id)
     
 @login_required
-def watchlist(request):
+def watchlist_toggle(request):
     if request.method == "POST":
         #I3- Reacll request envelope yabni process (key=value) pairs is in the body
         
@@ -165,3 +168,16 @@ def watchlist(request):
                 messages.error(request, "Cannot add to watchlist")
             messages.success(request, "Added to watchlist")
         return redirect(request.META.get('HTTP_REFERER', 'index'))
+    
+    
+        
+       
+
+    
+        
+        
+        
+        
+
+
+
