@@ -1,0 +1,257 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<style>
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .shop-all-btn {
+        background: none;
+        border: none;
+        color: #e74c3c;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+    }
+
+    .shop-all-btn:hover {
+        background-color: rgba(231, 76, 60, 0.1);
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .category-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid transparent;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .category-card.selected {
+        border-color: #27ae60;
+        background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(39, 174, 96, 0.05) 100%);
+    }
+
+    .category-card.selected::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(39, 174, 96, 0.1);
+        pointer-events: none;
+    }
+
+    .checkmark {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 30px;
+        height: 30px;
+        background: #27ae60;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    /* when background changes, change the checkmark with it */
+    .category-card.selected .checkmark {
+        display: flex;
+    }
+
+    .checkmark::after {
+        content: '✓';
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .category-image {
+        width: 100%;
+        height: 200px;
+        background: #2c3e50;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .category-info {
+        text-align: center;
+        position: relative;
+        z-index: 5;
+    }
+
+    .category-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+
+    .category-browse {
+        color: #7f8c8d;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .selected-count {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #27ae60;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(39, 174, 96, 0.3);
+        transform: scale(0);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+
+    .selected-count.show {
+        transform: scale(1);
+    }
+
+</style>
+
+<div class="container">
+    <form action="{% url 'categories' %}" method="POST" id="categoryForm">
+    {% csrf_token %}
+        <div class="header">
+            <h1>Best Selling Categories</h1>
+            <button type="submit" class="shop-all-btn">Shop All</a>
+        </div>
+
+        <div class="categories-grid">
+            {% for category in categories %}
+            <div class="category-card {% if category.is_featured %}selected{% endif %}" data-category="{{ category.id }}" tabindex="0">
+                <div class="checkmark"></div>
+                <div class="category-image">
+                    {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                    {% else %}
+                        <div class="placeholder-design">{{ category.name|slice:":1"|upper }}</div>
+                    {% endif %}
+                </div>
+                <div class="category-info">
+                    <div class="category-name">{{ category.name }}</div>
+                    <div class="category-browse"> Browse Category</div>
+                </div>
+            </div>
+            {% endfor %}
+            <input type="hidden" id="selectedCategoriesInput" name="selected_categories">
+        </div>
+    </form>
+</div>
+
+<div class="selected-count" id="selectedCount">
+    <span id="countText">0 categories selected</span>
+</div>
+
+<script>
+    document.querySelector('DOMContentLoaded', function(){
+        const categories = document.querySelectorAll('.category-card');
+        const selectedCategories = new set();
+        const selectedCategoriesInput = document.getElementById('selectedCategoriesInput');
+        const countText = document.getElementById('countText');
+        const selectedCount = document.getElementById('selectedCount');
+
+        document.querySelectorAll('.category-card.selected').forEach(function(category){
+            selectedCategories.add(category.dataset.category);
+        });
+
+        updateSelectedCount();
+        updateHiddenInput();
+
+        categories.forEach(function(category) {
+            document.addEventListener('click', function(){
+                const categoryId = this.dataset.category;
+                
+                if(category.classList.contains('selected')){
+                    category.classList.remove('selected');
+                    //This is a set (recall) in cp set had methods!
+                    selectedCategories.delete(categoryId);
+                }
+                else{
+                    category.classList.add('selected');
+                    selectedCategories.add(categoryId);
+                }
+
+                updateSelectedCount();
+                updateHiddenInput();
+
+            });
+            category.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+
+    function updateSelectedCount(){
+        const count = selectedCategories.size;
+        if (count > 0) {
+            countText.textContent = `${count} categor${count !== 1 ? 'ies' : 'y'} selected`;
+            selectedCount.classList.add('show');
+        } else {
+            selectedCount.classList.remove('show');
+        }
+    }
+    function updateHiddenInput(){
+        selectedCategoriesInput.value = Array.from(selectedCategories).join(',');
+    }
+});
+</script>
+{% endblock %}
