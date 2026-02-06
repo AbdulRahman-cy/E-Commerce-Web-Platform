@@ -169,6 +169,27 @@ def watchlist_toggle(request):
             messages.success(request, "Added to watchlist")
         return redirect(request.META.get('HTTP_REFERER', 'index'))
     
+@login_required
+def watchlist_view(request):
+    
+    user = request.user
+    user_likes = user.likes.all()
+
+    liked_listings = Listing.objects.filter(likes__in=user_likes)
+
+    watchlists = Watchlist.objects.filter(user=user)
+
+    watchlist = Listing.objects.filter(watchlists__in=watchlists)
+
+    listings = Listing.objects.filter(is_active=True, watchlists__in=watchlists)
+    
+    return render(request, "auctions/index.html", {
+                "listings": listings,
+                "liked_listings": liked_listings,
+                "watchlist": watchlist
+                 })
+    
+    
     
         
        
