@@ -103,7 +103,7 @@
                 <span class="like-text"> likes </span>
             </button>
 
-            <form action="{% url 'watchlist' %}" method="POST" class="d-inline">
+            <form action="{% url 'watchlist_toggle' %}" method="POST" class="d-inline">
             {% csrf_token %}
             <input type="hidden" name="listing" value="{{ listing.id }}">
 
