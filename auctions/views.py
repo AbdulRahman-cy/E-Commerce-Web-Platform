@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import *
+from django.contrib import messages
 
 
 def login_view(request):
@@ -62,6 +63,7 @@ def index(request):
     listings = Listing.objects.filter(is_active=True)
     user = request.user
     user_likes = user.likes.all()
+    #user_likes => querySet
     liked_listings = Listing.objects.filter(likes__in=user_likes)
     
     
@@ -105,11 +107,15 @@ def listing(request, listing_id):
     comments = Comment.objects.filter(listing_id = listing_id)
     comments_count = comments.count()
 
+    watchlists = Watchlist.objects.all()
+    watchlist = Listing.objects.filter(watchlists__in=watchlists)
+
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "liked_listings":liked_listings,
         "comments": comments,
-        "comments_count": comments_count
+        "comments_count": comments_count,
+        "watchlist": watchlist
     })      
 
 @login_required
@@ -129,6 +135,30 @@ def comment(request, listing_id):
             })
         
         return redirect("listing", listing_id=listing_id)
+    
+#I4- watchlist function gets activated when triggered from several routes so should i include the "listing_id as a parameter"
+@login_required
+def watchlist(request):
+    if request.method == "POST":
+        #I3- Reacll request envelope yabni process (key=value) pairs is in the body
+        
+        listing_id = request.POST["listing"]
+
+        watchlist = Watchlist.objects.filter(user=request.user, listing_id=listing_id)
+        if watchlist:
+            watchlist.delete()
+            messages.success(request, "Removed from watchlist")
+        else:
+            try:
+                Watchlist.objects.create(user=request.user, listing_id=listing_id)
+            except IntegrityError:
+                messages.error(request, "Cannot add to watchlist")
+            messages.success(request, "Added to watchlist")
+        return redirect(request.META.get('HTTP_REFERER', 'index'))
+        
+       
+
+    
         
         
         
