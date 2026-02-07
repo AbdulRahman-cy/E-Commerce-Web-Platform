@@ -61,8 +61,9 @@ def register(request):
 @never_cache
 @login_required
 def index(request):
-
-    listings = Listing.objects.filter(is_active=True)
+    #Needs mod here
+    categories=Category.objects.filter(is_selected=True)
+    listings = Listing.objects.filter(is_active=True, category__in=categories)
     user = request.user
     user_likes = user.likes.all()
     #user_likes => querySet
@@ -71,6 +72,7 @@ def index(request):
     watchlists = Watchlist.objects.filter(user=user)
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
     
+
     
     #return index.html
     return render(request, "auctions/index.html", {
@@ -188,7 +190,41 @@ def watchlist_view(request):
                 "liked_listings": liked_listings,
                 "watchlist": watchlist
                  })
-    
+
+@login_required
+def categories(request):
+
+    if request.method == "POST":
+
+        raw = request.POST.get("selected_categories")
+
+        if raw:
+            selected_ids = raw.split(",")
+        else:
+            selected_ids = []
+
+        # reset all categories
+        Category.objects.update(is_selected=False)
+
+        # mark only selected ones
+        if selected_ids:
+            Category.objects.filter(id__in=selected_ids).update(is_selected=True)
+
+        messages.success(
+            request,
+            "Displayed listings are based on your category selection"
+        )
+
+        return redirect("index")
+
+    categories = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": categories
+    })
+
+
+
+        
     
     
         

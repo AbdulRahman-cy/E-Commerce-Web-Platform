@@ -175,11 +175,11 @@
 
         <div class="categories-grid">
             {% for category in categories %}
-            <div class="category-card {% if category.is_featured %}selected{% endif %}" data-category="{{ category.id }}" tabindex="0">
+            <div class="category-card {% if category.is_selected %}selected{% endif %}" data-category="{{ category.id }}" tabindex="0">
                 <div class="checkmark"></div>
                 <div class="category-image">
-                    {% if category.image %}
-                        <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                    {% if category.image_url %}
+                        <img src="{{ category.image_url }}" alt="{{ category.name }}">
                     {% else %}
                         <div class="placeholder-design">{{ category.name|slice:":1"|upper }}</div>
                     {% endif %}
@@ -200,9 +200,9 @@
 </div>
 
 <script>
-    document.querySelector('DOMContentLoaded', function(){
+    document.addEventListener('DOMContentLoaded', function(){
         const categories = document.querySelectorAll('.category-card');
-        const selectedCategories = new set();
+        const selectedCategories = new Set();
         const selectedCategoriesInput = document.getElementById('selectedCategoriesInput');
         const countText = document.getElementById('countText');
         const selectedCount = document.getElementById('selectedCount');
@@ -215,7 +215,7 @@
         updateHiddenInput();
 
         categories.forEach(function(category) {
-            document.addEventListener('click', function(){
+            category.addEventListener('click', function(){
                 const categoryId = this.dataset.category;
                 
                 if(category.classList.contains('selected')){
