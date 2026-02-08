@@ -61,7 +61,7 @@ def register(request):
 @never_cache
 @login_required
 def index(request):
-    #Needs mod here
+
     categories=Category.objects.filter(is_selected=True)
     listings = Listing.objects.filter(is_active=True, category__in=categories)
     user = request.user
@@ -72,13 +72,15 @@ def index(request):
     watchlists = Watchlist.objects.filter(user=user)
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
     
-
+    cart_querySet = Cart.objects.filter(user=request.user)
+    cart = Listing.objects.filter(cart_items__in=cart_querySet)
     
     #return index.html
     return render(request, "auctions/index.html", {
                 "listings": listings,
                 "liked_listings": liked_listings,
-                "watchlist": watchlist })
+                "watchlist": watchlist,
+                "cart": cart})
 
 @login_required
 def toggle_like(request, listing_id):
@@ -221,6 +223,28 @@ def categories(request):
     return render(request, "auctions/categories.html", {
         "categories": categories
     })
+
+@login_required
+def toggle_cart(request, listing_id):
+    if request.method == "POST":
+        listing = get_object_or_404(Listing, pk=listing_id)
+        cart, created = Cart.objects.get_or_create(listing=listing, user=request.user)
+
+        if not created:
+            cart.delete()
+            in_cart = False
+        else:
+            in_cart = True
+
+        return JsonResponse({
+        'in_cart': in_cart
+    })
+
+#view_cart
+    
+
+
+
 
 
 
