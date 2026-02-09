@@ -89,5 +89,58 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 
+<!-- Floating Cart Button -->
+{% if user.is_authenticated %}
+<a href="#" id="cartButton" class="floating-cart {% if cart_count > 0 %}show{% endif %}" data-count="{{ cart_count }}">
+    🛒 Cart 
+    <span id="cartCountBadge" class="cart-badge">{{ cart_count }}</span>
+</a>
+
+<script>
+function getCookie(name){
+    let cookieValue = null;
+    if(document.cookie && document.cookie !== null){
+        const cookies = document.cookie.split(';');
+        for(let i = 0; i < cookies.length; i++){
+            const cookie = cookies[i].trim()
+            if(cookie.substring(0, name.length + 1) === (name + '=')){
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Global cart update function
+window.updateCartUI = function(cartCount, inCart, buttonElement) {
+    const cartButton = document.getElementById('cartButton');
+    const cartCountBadge = document.getElementById('cartCountBadge');
+    
+    if(cartButton && cartCountBadge) {
+        cartCountBadge.textContent = cartCount;
+        cartButton.dataset.count = cartCount;
+        
+        if(cartCount > 0){
+            cartButton.classList.add('show');
+        } else {
+            cartButton.classList.remove('show');
+        }
+    }
+    
+    // Update the clicked button
+    if(buttonElement) {
+        if(inCart){
+            buttonElement.classList.add('in-cart');
+            buttonElement.textContent = 'Remove from cart';
+        } else {
+            buttonElement.classList.remove('in-cart');
+            buttonElement.textContent = '🛒 Add to cart';
+        }
+    }
+};
+</script>
+{% endif %}
+
 </body>
 </html>

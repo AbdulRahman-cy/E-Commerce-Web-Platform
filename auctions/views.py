@@ -72,15 +72,12 @@ def index(request):
     watchlists = Watchlist.objects.filter(user=user)
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
     
-    cart_querySet = Cart.objects.filter(user=request.user)
-    cart = Listing.objects.filter(cart_items__in=cart_querySet)
-    
     #return index.html
     return render(request, "auctions/index.html", {
                 "listings": listings,
                 "liked_listings": liked_listings,
                 "watchlist": watchlist,
-                "cart": cart})
+                })
 
 @login_required
 def toggle_like(request, listing_id):
@@ -186,11 +183,18 @@ def watchlist_view(request):
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
 
     listings = Listing.objects.filter(is_active=True, watchlists__in=watchlists)
+
+    #I should find a way to elimate redundancy between watchlist view and index fns
+    cart_querySet = Cart.objects.filter(user=request.user)
+    cart = Listing.objects.filter(cart_items__in=cart_querySet)
+    cart_count = Cart.objects.filter(user=request.user).count()
     
     return render(request, "auctions/index.html", {
                 "listings": listings,
                 "liked_listings": liked_listings,
-                "watchlist": watchlist
+                "watchlist": watchlist,
+                "cart": cart,
+                "cart_count": cart_count
                  })
 
 @login_required
@@ -236,12 +240,14 @@ def toggle_cart(request, listing_id):
         else:
             in_cart = True
 
+        cart_count = Cart.objects.filter(user=request.user).count()
         return JsonResponse({
-        'in_cart': in_cart
+        'in_cart': in_cart,
+        'cart_count': cart_count
     })
 
-#view_cart
-    
+
+
 
 
 
