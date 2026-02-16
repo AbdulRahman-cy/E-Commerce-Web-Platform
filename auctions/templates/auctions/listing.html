@@ -138,7 +138,7 @@
             </button>
 
             <button class="cart-btn {% if listing in cart %}in-cart{% endif %}" 
-              data-listing-id="{{ listing.id }}" type="button">
+              data-listing-id="{{ listing.id }}" type="button" data-cart-url="{% url 'toggle_cart' listing.id %}">
                   {% if listing in cart %}Remove from cart{% else %}🛒 Add to cart{% endif %}
               </button>
           </form>
@@ -258,8 +258,9 @@
                 const listingId = this.dataset.listingId;
                 const csrftoken = getCookie('csrftoken');
                 const cartButton = document.getElementById('cartButton');
+                const url = this.dataset.cartUrl;
                 try{
-                    response = await fetch(`/listing/${listingId}/cart/`, {
+                    response = await fetch(url, {
                     method : "POST",
                     headers: {
                             'X-CSRFToken': csrftoken,
