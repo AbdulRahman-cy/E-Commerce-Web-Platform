@@ -50,6 +50,31 @@
     color: white;
 }
 
+.cart-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #0d6efd;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-top: 7px;
+}
+
+.cart-btn:hover {
+    background: #0b5ed7;
+}
+
+.cart-btn:disabled {
+    background: #adb5bd;
+    cursor: not-allowed;
+}
+
+.cart-btn.in-cart {
+    background: #198754;
+}
+
 </style>
 <div class="container my-5">
 
@@ -111,6 +136,11 @@
                     class="watchlist-btn {% if listing in watchlist %}added{% endif %}">
                 ⭐ {% if listing in watchlist %}Remove from watchlist{% else %}Add to watchlist{% endif %}
             </button>
+
+            <button class="cart-btn {% if listing in cart %}in-cart{% endif %}" 
+              data-listing-id="{{ listing.id }}" type="button">
+                  {% if listing in cart %}Remove from cart{% else %}🛒 Add to cart{% endif %}
+              </button>
           </form>
 
           </div>
@@ -223,7 +253,31 @@
       alert('Failed to update like');
     }
     });
-  });
+    cartBtn = document.querySelector('.cart-btn');
+    cartBtn.addEventListener('click', async function() {
+                const listingId = this.dataset.listingId;
+                const csrftoken = getCookie('csrftoken');
+                const cartButton = document.getElementById('cartButton');
+                try{
+                    response = await fetch(`/listing/${listingId}/cart/`, {
+                    method : "POST",
+                    headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({})
+                    });
+                    const data = await response.json();
+                    //Then modify it here for realtime change
+                    window.updateCartUI(data.cart_count, data.in_cart, cartBtn);
+                }
+                catch(error){
+                    console.error('Error:', error);
+                    alert('Failed to add to cart');
+                }
+
+            });
+        });
 </script>
 
 {% endblock %}

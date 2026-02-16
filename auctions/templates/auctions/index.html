@@ -82,6 +82,7 @@
     border-color: #f59e0b;
     color: white;
 }
+
 .cart-btn {
     padding: 8px 14px;
     border-radius: 8px;
@@ -254,7 +255,7 @@
                 const csrftoken = getCookie('csrftoken');
                 const cartButton = document.getElementById('cartButton');
                 try{
-                    response = await fetch(`listing/${listingId}/cart/`, {
+                    response = await fetch(`/listing/${listingId}/cart/`, {
                     method : "POST",
                     headers: {
                             'X-CSRFToken': csrftoken,
