@@ -17,5 +17,7 @@ urlpatterns = [
     path("watchlist/", views.watchlist_view, name="watchlist_view"),
     path("watchlist_toggle/", views.watchlist_toggle, name="watchlist_toggle"),
     path("category/", views.categories, name="categories"),
+
+    path("cart/", views.cart_view, name="cart_view"),
 ]
 

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
-
+import json
 
 def login_view(request):
     if request.method == "POST":
@@ -230,21 +230,56 @@ def categories(request):
 
 @login_required
 def toggle_cart(request, listing_id):
+
     if request.method == "POST":
-        listing = get_object_or_404(Listing, pk=listing_id)
-        cart, created = Cart.objects.get_or_create(listing=listing, user=request.user)
+        data = json.loads(request.body)
+        action = data.get("action")
 
-        if not created:
-            cart.delete()
-            in_cart = False
+        #Now we want to get the cart item user fetched
+        listing = get_object_or_404(Listing, pk=listing_id)        
+        cart_item = Cart.objects.filter(listing=listing, user = request.user).first()
+
+        #If user pressed on +
+        if action == "+" and cart_item:
+            cart_item.quantity += 1
+            cart_item.save()
+
+        #If user pressed on - 
+        elif action == "-" and cart_item:
+            if cart_item.quantity > 0:
+                cart_item.quantity -= 1
+                cart_item.save()
+            else:
+                cart_item.delete()
+                cart_item = None 
+
+        #Same button "add to cart" OR "remove from cart"
         else:
-            in_cart = True
 
+            #Remove from cart
+            if cart_item:
+                cart_item = None
+
+            #Add to cart
+            else:
+                cart_item = Cart.objects.create(listing=listing, user=request.user)
+        
+        in_cart = cart_item is not None
+
+        #Count of a given single item added to cart
+        item_quantity = cart_item.quantity if cart_item else 0
+
+        #Count of all items added to cart
         cart_count = Cart.objects.filter(user=request.user).count()
         return JsonResponse({
         'in_cart': in_cart,
-        'cart_count': cart_count
+        'cart_count': cart_count,
+        'item_quantity': item_quantity
     })
+
+@login_required
+def cart_view(request):
+    return render(request, "auctions/cart.html")
 
 
 
