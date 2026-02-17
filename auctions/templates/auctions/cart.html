@@ -1,0 +1,101 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<style>
+.cart-page{
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.cart-item{
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    margin-bottom: 14px;
+}
+
+.cart-item img{
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.cart-title{
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.cart-price{
+    color: #198754;
+    font-weight: 600;
+}
+
+.cart-actions{
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.cart-summary{
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 14px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>
+
+<div class="cart-page">
+
+    <h2 class="mb-4">Your cart</h2>
+
+    {% for item in cart %}
+
+        <div class="cart-item">
+
+            {% if item.image_url %}
+                <img src="{{ item.image_url }}">
+            {% endif %}
+
+            <div>
+                <div class="cart-title">{{ item.title }}</div>
+                <div class="cart-price">${{ item.starting_price }}</div>
+                <div class="text-muted small">
+                    Seller: {{ item.owner.username }}
+                </div>
+            </div>
+
+            <div class="cart-actions">
+                <form method="post" >
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger">
+                        Remove
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+    {% empty %}
+        <p>Your cart is empty.</p>
+    {% endfor %}
+
+    {% if cart %}
+        <div class="cart-summary">
+            <strong>Total items: {{ cart|length }}</strong>
+            <button class="btn btn-success">
+                Checkout
+            </button>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
