@@ -196,14 +196,24 @@ def watchlist_view(request):
     cart_querySet = Cart.objects.filter(user=request.user)
     cart = Listing.objects.filter(cart_items__in=cart_querySet)
     cart_count = Cart.objects.filter(user=request.user).count()
+
+    cart_items = Cart.objects.filter(user=request.user)
+    
+    cart_map = {}
+
+    for item in cart_items:
+        cart_map[item.listing_id] = item.quantity
     
     return render(request, "auctions/index.html", {
                 "listings": listings,
                 "liked_listings": liked_listings,
                 "watchlist": watchlist,
                 "cart": cart,
-                "cart_count": cart_count
+                "cart_count": cart_count,
+                "cart_map":cart_map
                  })
+
+    
 
 @login_required
 def categories(request):
