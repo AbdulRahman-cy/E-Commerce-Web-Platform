@@ -282,7 +282,7 @@
                     });
                     const data = await response.json();
                     //Then modify it here for realtime change
-                    window.updateCartUI(data.cart_count, data.in_cart, cart, listingId, data.quantity);
+                    window.updateCartUI(data.cart_count, data.in_cart, cart, listingId, data.item_quantity);
                 }
                 catch(error){
                     console.error('Error:', error);
