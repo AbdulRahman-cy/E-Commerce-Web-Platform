@@ -203,12 +203,20 @@
                 </button>
 
                 <!-- "+" "-" controls-->
-                <div id="cart-controls-{{listing.id}}" data-listing-id="{{listing.id}}" >
-                    {% if listing in cart %}
-                        <button class="qty-btn-decrease" data-cart-url="{% url 'toggle_cart' listing.id %}" data-listing-id="{{ listing.id }}">−</button>
-                            <span id="qty-{{listing.id}}">{{ cart_map|get_item:listing.id }}</span>
-                        <button class="qty-btn-increase" data-cart-url="{% url 'toggle_cart' listing.id %}" data-listing-id="{{ listing.id }}">+</button>
-                    {% endif %}
+                <div id="cart-controls-{{listing.id}}" 
+                    style="display: {% if listing in cart %}inline-flex{% else %}none{% endif %};">
+                    
+                    <button class="qty-btn-decrease" 
+                            data-cart-url="{% url 'toggle_cart' listing.id %}" 
+                            data-listing-id="{{ listing.id }}">−</button>
+                    
+                    <span id="qty-{{listing.id}}">
+                        {{ cart_map|get_item:listing.id|default:0 }}
+                    </span>
+                    
+                    <button class="qty-btn-increase" 
+                            data-cart-url="{% url 'toggle_cart' listing.id %}" 
+                            data-listing-id="{{ listing.id }}">+</button>
                 </div>
 
             </div>
