@@ -91,7 +91,7 @@
 
 <!-- Floating Cart Button -->
 {% if user.is_authenticated %}
-<a href="#" id="cartButton" class="floating-cart {% if cart_count > 0 %}show{% endif %}" data-count="{{ cart_count }}">
+<a href="{% url 'cart_view' %}" id="cartButton" class="floating-cart {% if cart_count > 0 %}show{% endif %}" data-count="{{ cart_count }}">
     🛒 Cart 
     <span id="cartCountBadge" class="cart-badge">{{ cart_count }}</span>
 </a>
@@ -113,7 +113,7 @@ function getCookie(name){
 }
 
 // Global cart update function
-window.updateCartUI = function(cartCount, inCart, buttonElement) {
+window.updateCartUI = function(cartCount, inCart, buttonElement, listingId, item_quantity) {
     const cartButton = document.getElementById('cartButton');
     const cartCountBadge = document.getElementById('cartCountBadge');
     
@@ -138,7 +138,24 @@ window.updateCartUI = function(cartCount, inCart, buttonElement) {
             buttonElement.textContent = '🛒 Add to cart';
         }
     }
-};
+
+    // Update the quantity display
+    const qtySpan = document.getElementById(`qty-${listingId}`);
+    if(qtySpan) {
+        qtySpan.textContent = item_quantity;
+    }
+
+    // Show/hide cart controls based on whether item is in cart
+    const controls = document.getElementById(`cart-controls-${listingId}`);
+    if(controls) {
+        if(inCart && item_quantity > 0) {
+            controls.style.display = 'block';
+        } else {
+            controls.style.display = 'none';
+        }
+    }
+
+}
 </script>
 {% endif %}
 

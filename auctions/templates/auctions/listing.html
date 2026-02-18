@@ -123,7 +123,7 @@
 
             <!-- ajax like_button-->
             <button class="like-btn {% if listing in liked_listings %}liked{% endif %}"
-                data-listing-id="{{ listing.id }}">
+                data-listing-id="{{ listing.id }}" data-like-url="{% url 'toggle_like' listing.id%}">
                   ❤️ <span class="like-count">{{ listing.likes.count }}</span> 
                 <span class="like-text"> likes </span>
             </button>
@@ -223,11 +223,11 @@
     button.addEventListener('click', async function(event){
       event.preventDefault();
 
-      const listingId = button.dataset.listingId
+      const listingId = button.dataset.listingId;
       const csrftoken = getCookie('csrftoken');
-
+      const url = this.dataset.likeUrl;
       try {
-        const response = await fetch(`/listing/${listingId}/like/`, {
+        const response = await fetch(url, {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrftoken,

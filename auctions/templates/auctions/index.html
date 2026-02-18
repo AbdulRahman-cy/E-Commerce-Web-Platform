@@ -1,4 +1,5 @@
 {% extends "auctions/layout.html" %}
+{% load auction_tags %}
 
 {% block body %}
 
@@ -146,7 +147,7 @@
 
                 {# Like button - check if current user has already liked this #}
                 <button class="like-btn {% if listing in liked_listings %}liked{% endif %}"
-                    data-listing-id="{{ listing.id }}">
+                    data-listing-id="{{ listing.id }}" data-like-url="{% url 'toggle_like' listing.id%}">
                     ❤️ <span class="like-count">{{ listing.likes.count }}</span> 
                     <span class="like-text"> likes </span>
                 </button>
@@ -161,10 +162,21 @@
                     </button>
                 </form>
 
+                <!--Add to cart button-->
                 <button class="cart-btn {% if listing in cart %}in-cart{% endif %}" 
                 data-listing-id="{{ listing.id }}" type="button" data-cart-url="{% url 'toggle_cart' listing.id %}">
                     {% if listing in cart %}Remove from cart{% else %}🛒 Add to cart{% endif %}
                 </button>
+
+                <!-- "+" "-" controls-->
+                <div id="cart-controls-{{listing.id}}" data-listing-id="{{listing.id}}" >
+                    {% if listing in cart %}
+                        <button class="qty-btn-decrease" data-cart-url="{% url 'toggle_cart' listing.id %}" data-listing-id="{{ listing.id }}">−</button>
+                            <span id="qty-{{listing.id}}">{{ cart_map|get_item:listing.id }}</span>
+                        <button class="qty-btn-increase" data-cart-url="{% url 'toggle_cart' listing.id %}" data-listing-id="{{ listing.id }}">+</button>
+                    {% endif %}
+                </div>
+
             </div>
         </div>
     {% empty %}
@@ -200,11 +212,11 @@
             button.addEventListener('click', async function(event){
                 event.preventDefault();
                 const listingId = button.dataset.listingId;
-
+                const url = this.dataset.likeUrl;
                 const csrftoken = getCookie('csrftoken');
 
                 try {
-                    const response = await fetch(`/listing/${listingId}/like/`, {
+                    const response = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'X-CSRFToken': csrftoken,
@@ -239,7 +251,9 @@
                 //This needs to be changed
                 if(event.target.closest('.like-btn') || 
                    event.target.closest('.cart-btn') ||
-                   event.target.closest('.watchlist-btn')
+                   event.target.closest('.watchlist-btn') ||
+                   event.target.closest('.qty-btn-decrease') ||
+                   event.target.closest('.qty-btn-increase')
                 ){
                     return;
                 }
@@ -249,12 +263,14 @@
             });
         });
         
+        //Ajax add to cart button
         document.querySelectorAll('.cart-btn').forEach(function(cart){
             cart.addEventListener('click', async function() {
                 const listingId = this.dataset.listingId;
                 const csrftoken = getCookie('csrftoken');
                 const cartButton = document.getElementById('cartButton');
                 const url = cart.dataset.cartUrl;
+
                 try{
                     response = await fetch(url, {
                     method : "POST",
@@ -266,7 +282,7 @@
                     });
                     const data = await response.json();
                     //Then modify it here for realtime change
-                    window.updateCartUI(data.cart_count, data.in_cart, cart);
+                    window.updateCartUI(data.cart_count, data.in_cart, cart, listingId, data.quantity);
                 }
                 catch(error){
                     console.error('Error:', error);
@@ -274,6 +290,64 @@
                 }
 
             });
+        });
+
+        //If "-"
+        document.querySelectorAll('.qty-btn-decrease').forEach(function(btn){
+            btn.addEventListener('click', async function(){
+                const action = 'decrease';
+                const listingId = btn.dataset.listingId;
+                const csrftoken = getCookie('csrftoken');
+                const url = this.dataset.cartUrl;
+                const cartBtn = document.querySelector(`.cart-btn[data-listing-id="${listingId}"]`);
+                try{
+                    const response = await fetch(url, {
+                    method : "POST",
+                    headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({action})
+                    });
+                    const data = await response.json();
+                    //Then modify it here for realtime change
+                    window.updateCartUI(data.cart_count, data.in_cart, cartBtn, listingId, data.item_quantity);
+                    }
+                    catch(error){
+                        console.error('Error:', error);
+                        alert('Failed to add to cart');
+                    }
+            });
+
+        });
+
+        //If "+"
+        document.querySelectorAll('.qty-btn-increase').forEach(function(btn){
+            btn.addEventListener('click', async function(){
+                const action = 'increase';
+                const listingId = btn.dataset.listingId;
+                const csrftoken = getCookie('csrftoken');
+                const url = this.dataset.cartUrl;
+                const cartBtn = document.querySelector(`.cart-btn[data-listing-id="${listingId}"]`);
+                try{
+                    const response = await fetch(url, {
+                    method : "POST",
+                    headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({action})
+                    });
+                    const data = await response.json();
+                    //Then modify it here for realtime change
+                    window.updateCartUI(data.cart_count, data.in_cart, cartBtn, listingId, data.item_quantity);
+                    }
+                    catch(error){
+                        console.error('Error:', error);
+                        alert('Failed to add to cart');
+                    }
+            });
+
         });
     });
 </script>

@@ -71,12 +71,20 @@ def index(request):
 
     watchlists = Watchlist.objects.filter(user=user)
     watchlist = Listing.objects.filter(watchlists__in=watchlists)
+
+    cart_items = Cart.objects.filter(user=request.user)
     
+    cart_map = {}
+
+    for item in cart_items:
+        cart_map[item.listing_id] = item.quantity
+
     #return index.html
     return render(request, "auctions/index.html", {
                 "listings": listings,
                 "liked_listings": liked_listings,
                 "watchlist": watchlist,
+                "cart_map": cart_map
                 })
 
 @login_required
@@ -240,13 +248,13 @@ def toggle_cart(request, listing_id):
         cart_item = Cart.objects.filter(listing=listing, user = request.user).first()
 
         #If user pressed on +
-        if action == "+" and cart_item:
+        if action == "increase" and cart_item:
             cart_item.quantity += 1
             cart_item.save()
 
         #If user pressed on - 
-        elif action == "-" and cart_item:
-            if cart_item.quantity > 0:
+        elif action == "decrease" and cart_item:
+            if cart_item.quantity > 1:
                 cart_item.quantity -= 1
                 cart_item.save()
             else:
@@ -258,6 +266,7 @@ def toggle_cart(request, listing_id):
 
             #Remove from cart
             if cart_item:
+                cart_item.delete()
                 cart_item = None
 
             #Add to cart
