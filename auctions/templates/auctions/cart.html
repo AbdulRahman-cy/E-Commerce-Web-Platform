@@ -55,7 +55,7 @@
 [id^="cart-controls-"] {
     display: inline-flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     margin-top: 8px;
 }
 
@@ -91,47 +91,41 @@
 
     <h2 class="mb-4">Your cart</h2>
 
-    {% for item in cart %}
+   {% for item in cart %}
+    <div class="cart-item" data-listing-id="{{ item.id }}">
 
-        <div class="cart-item listing-card" data-listing-id="{{ item.id }}">
+        {% if item.image_url %}
+            <img src="{{ item.image_url }}">
+        {% endif %}
 
-            {% if item.image_url %}
-                <img src="{{ item.image_url }}">
-            {% endif %}
-
-            <div>
-                <div class="cart-title">{{ item.title }}</div>
-                <div class="cart-price">${{ item.starting_price }}</div>
-                <div class="text-muted small">
-                    Seller: {{ item.owner.username }}
-                </div>
-            </div>
-
-            <div class="cart-actions">
-                <div id="cart-controls-{{ item.id }}" class="d-flex align-items-center gap-3">
-                    <button class="qty-btn-decrease" 
-                            data-cart-url="{% url 'toggle_cart' item.id %}" 
-                            data-listing-id="{{ item.id }}">−</button>
-                    
-                    <span id="qty-{{ item.id }}" class="fw-bold mx-2">
-                        {{ cart_map|get_item:item.id|default:1 }}
-                    </span>
-                    
-                    <button class="qty-btn-increase" 
-                            data-cart-url="{% url 'toggle_cart' item.id %}" 
-                            data-listing-id="{{ item.id }}">+</button>
-                </div>
-
-                <form method="post" action="{% url 'toggle_cart' item.id %}" class="ms-4">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                        Remove All
-                    </button>
-                </form>
-            </div>
-
+        <div>
+            <div class="cart-title">{{ item.title }}</div>
+            <div class="cart-price">${{ item.starting_price }}</div>
         </div>
 
+        <div class="cart-actions">
+            <div id="cart-controls-{{ item.id }}" class="d-flex align-items-center gap-3 me-4">
+                <button class="qty-btn-decrease" 
+                        data-cart-url="{% url 'toggle_cart' item.id %}" 
+                        data-listing-id="{{ item.id }}">−</button>
+                
+                <span id="qty-{{ item.id }}" class="fw-bold mx-2">
+                    {{ cart_map|get_item:item.id|default:1 }}
+                </span>
+                
+                <button class="qty-btn-increase" 
+                        data-cart-url="{% url 'toggle_cart' item.id %}" 
+                        data-listing-id="{{ item.id }}">+</button>
+            </div>
+
+            
+                <button class="btn btn-sm btn-outline-danger cart-remove-all-btn" 
+                        data-listing-id="{{ item.id }}" 
+                        data-cart-url="{% url 'toggle_cart' item.id %}">
+                    Remove All
+                </button>
+        </div>
+    </div>
     {% empty %}
         <p>Your cart is empty.</p>
     {% endfor %}

@@ -29,6 +29,28 @@ window.updateCartUI = function(cartCount, inCart, buttonElement, listingId, item
             cartButton.classList.remove('show');
         }
     }
+
+    if (item_quantity === 0) {
+        // Find the specific item card using the listingId
+        const card = document.querySelector(`.cart-item[data-listing-id="${listingId}"]`);
+        
+        // Only remove if we are physically on the cart page URL
+        if (card && window.location.pathname.includes('/cart/')) {
+            card.style.opacity = '0';
+            card.style.transition = 'opacity 0.3s ease';
+            
+            setTimeout(() => {
+                card.remove();
+                
+                // If it was the last item, show the "Empty" message
+                const container = document.querySelector('.cart-page');
+                if (container && document.querySelectorAll('.cart-item').length === 0) {
+                    container.innerHTML = '<h2 class="mb-4">Your cart</h2><p>Your cart is empty.</p>';
+                }
+            }, 300);
+            return; // Exit early since the item is gone
+        }
+    }
     
     if (buttonElement) {
         if (inCart) {
@@ -53,6 +75,6 @@ window.updateCartUI = function(cartCount, inCart, buttonElement, listingId, item
             controls.style.display = 'none';
         }
     }
-
+    
     
 };

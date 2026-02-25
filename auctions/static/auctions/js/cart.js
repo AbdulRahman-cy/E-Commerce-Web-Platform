@@ -40,7 +40,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Error:', error);
+  
             }
+         }
+
+           
+
+            if (target.classList.contains('cart-remove-all-btn')) {
+                event.preventDefault();
+                const btn = target;
+                const listingId = btn.dataset.listingId;
+                const url = btn.dataset.cartUrl;
+
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json',
+                        },
+                        // 'toggle' logic in your view deletes the item if it exists
+                        body: JSON.stringify({ action: 'toggle' })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Use the global UI function to vanish the item
+                    window.updateCartUI(data.cart_count, data.in_cart, null, listingId, data.item_quantity);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            
         }
     });
 });
