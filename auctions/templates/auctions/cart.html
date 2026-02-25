@@ -93,7 +93,7 @@
 
     {% for item in cart %}
 
-        <div class="cart-item">
+        <div class="cart-item listing-card" data-listing-id="{{ item.id }}">
 
             {% if item.image_url %}
                 <img src="{{ item.image_url }}">
