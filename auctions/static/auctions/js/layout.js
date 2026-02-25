@@ -48,9 +48,11 @@ window.updateCartUI = function(cartCount, inCart, buttonElement, listingId, item
     const controls = document.getElementById(`cart-controls-${listingId}`);
     if (controls) {
         if (inCart && item_quantity > 0) {
-            controls.style.display = 'inline-flex';
+            controls.style.display =   'inline-flex';
         } else {
             controls.style.display = 'none';
         }
     }
+
+    
 };
