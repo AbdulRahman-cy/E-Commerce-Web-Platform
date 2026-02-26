@@ -10,7 +10,7 @@ A robust, backend-focused e-commerce application designed for real-time auctioni
 
 > 🧠 These aren't just feature descriptions. Each section reflects a genuine technical challenge I faced, researched, and solved myself.
 
-* [🏛️ System Architecture](#-system-architecture)
+* [🏛️ System Architecture](#system-architecture)
 * [🎨 Frontend Engineering & UI Logic](#-frontend-engineering--ui-logic)
 * [⚙️ Backend Engineering & Data Integrity](#-backend-engineering--data-integrity)
 * [🚀 DevOps & Deployment (Docker)](#-devops--deployment-docker)
