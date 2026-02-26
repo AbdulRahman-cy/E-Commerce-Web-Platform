@@ -6,7 +6,9 @@
 
 A robust, backend-focused e-commerce application designed for real-time auctioning and category-based trading. This project demonstrates a transition from traditional multi-page applications to a modern, containerized architecture using AJAX for seamless user experiences.
 
-## 📑 Table of Contents 🧠 These aren't just feature descriptions. Each section reflects a genuine technical challenge I faced, researched, and solved myself.
+## 📑 Table of Contents
+
+> 🧠 These aren't just feature descriptions. Each section reflects a genuine technical challenge I faced, researched, and solved myself.
 
 * [🏛️ System Architecture](#-system-architecture)
 * [🎨 Frontend Engineering & UI Logic](#-frontend-engineering--ui-logic)
@@ -144,9 +146,15 @@ class Watchlist(models.Model):
 ## 📸 Project Gallery & Proof of Work
 
 ![Screenshot 1](screenshots/Screenshot%202026-02-26%20060707.png)
+
 ![Screenshot 2](screenshots/Screenshot%202026-02-26%20060748.png)
+
 ![Screenshot 3](screenshots/Screenshot%202026-02-26%20060856.png)
+
 ![Screenshot 4](screenshots/Screenshot%202026-02-26%20060913.png)
+
 ![Screenshot 5](screenshots/Screenshot%202026-02-26%20060946.png)
+
 ![Screenshot 6](screenshots/Screenshot%202026-02-26%20061018.png)
+
 ![Screenshot 7](screenshots/Screenshot%202026-02-26%20061035.png)
